@@ -160,13 +160,22 @@
       <div class="muted" id="todayDate"></div>
       <div id="todayTasks"></div>
       <div id="customTasks"></div>
-      <div class="hrs">
-        <span class="muted">今日学时：</span>
-        <input type="number" id="hrsInput" min="0" max="16" step="0.5" placeholder="0">
-        <span class="muted">h</span>
-        <span class="pill" id="hrsTarget"></span>
-      </div>
-      <div class="note" id="todayNote"></div>
+    <div class="hrs">
+      <span class="muted">今日学时：</span>
+      <input type="number" id="hrsInput" min="0" max="16" step="0.5" placeholder="0">
+      <span class="muted">h</span>
+      <span class="pill" id="hrsTarget"></span>
+    </div>
+    <div class="timer" id="timerBox" style="margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <button class="btn" id="timerStart">开始学习</button>
+      <span id="timerRun" style="display:none;align-items:center;gap:10px">
+        <span id="timerClock" style="font-variant-numeric:tabular-nums;font-size:18px;font-weight:500;min-width:88px;display:inline-block">00:00:00</span>
+        <button class="btn" id="timerPause">暂停</button>
+        <button class="btn primary" id="timerEnd">结束</button>
+      </span>
+      <span class="muted" id="timerHint" style="font-size:12px"></span>
+    </div>
+    <div class="note" id="todayNote"></div>
     </div>
     <div class="card" id="launchPreview">
       <h3><span class="dot"></span>启动周预览（8/1–8/6 · 在家全天）</h3>
@@ -317,7 +326,7 @@
     <div class="card">
       <h3><span class="dot"></span>🏠 今日</h3>
       <div class="exp"><b>功能：</b>顶部双倒计时（距初试 12/19、距启动 8/1）；按你当前阶段（启动周 / 培训工作日 / 周末 / 冲刺 / 考试 / 已结束）自动派发当日任务清单；记录今日学时并对比目标。</div>
-      <div class="exp"><b>操作：</b>① 逐项勾选已完成任务，勾选即时保存（绿色删除线表示完成）。② 学完在「今日学时」框填小时数（如 5.5），系统对比当日目标并提示是否达标。③ 8/1 前显示「启动周预览」，先照着准备。</div>
+      <div class="exp"><b>操作：</b>① 逐项勾选已完成任务，勾选即时保存（绿色删除线表示完成）。② 记学时两种方式：填数字（如 5.5）走「今日学时」框；或点「开始学习」计时器，学完点「结束」自动把真实时长写进今日学时（也支持暂停/继续，刷新页面不丢）。系统对比当日目标并提示是否达标。③ 8/1 前显示「启动周预览」，先照着准备。</div>
     </div>
 
     <div class="card">
@@ -516,6 +525,64 @@ function renderCustomTasks(d){
 $("#hrsInput").addEventListener("input",e=>{
   const v=parseFloat(e.target.value)||0; setH(todayStr(),v); renderData(); toast("学时已记 "+v+"h");
 });
+
+/* ---------- 计时器（极简：开始/结束自动记连续时长） ---------- */
+const TK_START="ky_timer_start", TK_PAUSE="ky_timer_pause", TK_ACC="ky_timer_acc";
+let _timerInt=null;
+function fmtHMS(ms){
+  const s=Math.max(0,Math.floor(ms/1000));
+  const hh=String(Math.floor(s/3600)).padStart(2,"0");
+  const mm=String(Math.floor(s%3600/60)).padStart(2,"0");
+  const ss=String(s%60).padStart(2,"0");
+  return hh+":"+mm+":"+ss;
+}
+function timerElapsed(){
+  const st=parseFloat(LS.getItem(TK_START)); if(!st) return 0;
+  const acc=parseFloat(LS.getItem(TK_ACC))||0;
+  const ps=LS.getItem(TK_PAUSE);
+  const cur=ps?parseFloat(ps):Date.now();
+  return Math.max(0,cur-st-acc);
+}
+function timerRender(){
+  const startBtn=$("#timerStart");
+  if(!LS.getItem(TK_START)){
+    if(period(todayStr())==="pre"){ startBtn.disabled=true; $("#timerHint").textContent="8/1 启动后开放计时"; }
+    else { startBtn.disabled=false; $("#timerHint").textContent="点「开始学习」自动计时，结束自动记入学时"; }
+    startBtn.style.display=""; $("#timerRun").style.display="none";
+    return;
+  }
+  startBtn.style.display="none"; $("#timerRun").style.display="inline-flex";
+  $("#timerPause").textContent= LS.getItem(TK_PAUSE)?"继续":"暂停";
+  $("#timerClock").textContent= fmtHMS(timerElapsed());
+  $("#timerHint").textContent= "本次将计入今日学时 ≈ "+(timerElapsed()/3600000).toFixed(2)+"h";
+}
+function timerStart(){
+  if(LS.getItem(TK_START)) return;
+  if(period(todayStr())==="pre"){ toast("8/1 启动后才开放计时"); return; }
+  LS.setItem(TK_START,String(Date.now())); LS.removeItem(TK_PAUSE); LS.removeItem(TK_ACC);
+  timerRender(); _timerInt=setInterval(()=>{ if(!LS.getItem(TK_PAUSE)) $("#timerClock").textContent=fmtHMS(timerElapsed()); },1000);
+  toast("开始计时，好好学习");
+}
+function timerTogglePause(){
+  const ps=LS.getItem(TK_PAUSE);
+  if(ps){ const acc=(parseFloat(LS.getItem(TK_ACC))||0)+(Date.now()-parseFloat(ps)); LS.setItem(TK_ACC,String(acc)); LS.removeItem(TK_PAUSE); }
+  else { LS.setItem(TK_PAUSE,String(Date.now())); }
+  timerRender();
+}
+function timerEnd(){
+  if(!LS.getItem(TK_START)) return;
+  const h=timerElapsed()/3600000; const d=todayStr();
+  setH(d,(getH(d)||0)+h);
+  LS.removeItem(TK_START); LS.removeItem(TK_PAUSE); LS.removeItem(TK_ACC);
+  if(_timerInt){clearInterval(_timerInt); _timerInt=null;}
+  timerRender(); renderToday(); renderData();
+  toast("本次学习 "+h.toFixed(2)+"h 已记入今日学时");
+}
+$("#timerStart").onclick=timerStart;
+$("#timerPause").onclick=timerTogglePause;
+$("#timerEnd").onclick=timerEnd;
+if(LS.getItem(TK_START)){ _timerInt=setInterval(()=>{ if(!LS.getItem(TK_PAUSE)) $("#timerClock").textContent=fmtHMS(timerElapsed()); },1000); }
+timerRender();
 
 /* ---------- 计划 ---------- */
 const PHASES=[
