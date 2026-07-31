@@ -1,0 +1,17 @@
+{
+  "name": "考研助手 · 27（深大 085401）",
+  "short_name": "考研助手27",
+  "description": "深圳大学085401新一代电子信息技术 考研备考工作台：倒计时/任务派发/师资/复盘/数据，手机可离线使用",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f6fa",
+  "theme_color": "#2f6fed",
+  "lang": "zh-CN",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
