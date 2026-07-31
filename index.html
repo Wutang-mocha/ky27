@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f6fed">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="考研助手27">
+<title>考研助手 · 27（深大 085401）</title>
+<style>
+  :root{
+    --bg:#eef1f6; --card:#fff; --ink:#16202c; --sub:#6b7686; --line:#e6eaf0;
+    --brand:#2f6fed; --brand2:#eaf1ff; --ok:#16a34a; --warn:#d97706; --bad:#dc2626;
+    --chip:#eef2ff; --radius:14px; --sideW:206px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--ink); font-size:15px; line-height:1.55;
+    display:flex; height:100vh; overflow:hidden;
+    -webkit-text-size-adjust:100%;
+  }
+  /* 左侧导航 */
+  .sidebar{
+    width:var(--sideW); flex:0 0 var(--sideW); background:linear-gradient(180deg,#2f6fed,#2756c4);
+    color:#fff; display:flex; flex-direction:column; padding:18px 12px; overflow-y:auto;
+  }
+  .sidebar .logo{font-size:17px;font-weight:800;padding:4px 8px 14px;line-height:1.2}
+  .sidebar .logo small{display:block;font-size:11px;font-weight:500;opacity:.85;margin-top:3px}
+  .sidebar nav a{
+    display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:11px;
+    color:rgba(255,255,255,.82);text-decoration:none;font-size:15px;font-weight:600;margin-bottom:4px;
+  }
+  .sidebar nav a .ic{font-size:19px;width:22px;text-align:center}
+  .sidebar nav a:hover{background:rgba(255,255,255,.12)}
+  .sidebar nav a.on{background:#fff;color:var(--brand)}
+  .sidebar .ft{margin-top:auto;font-size:11px;opacity:.7;padding:10px 8px 0;line-height:1.4}
+  /* 右侧内容 */
+  .main{flex:1;overflow-y:auto;position:relative}
+  .topbar{
+    position:sticky;top:0;z-index:20;background:linear-gradient(135deg,#2f6fed,#4f86f7);color:#fff;
+    padding:12px 22px;display:flex;gap:16px;align-items:center;flex-wrap:wrap
+  }
+  .topbar .t1{font-size:16px;font-weight:700}
+  .topbar .t1 small{font-weight:500;opacity:.9;margin-left:6px;font-size:12px}
+  .topbar .cd{display:flex;gap:12px;margin-left:auto}
+  .topbar .cd .box{background:rgba(255,255,255,.16);border-radius:10px;padding:5px 14px;text-align:center}
+  .topbar .cd .box .n{font-size:20px;font-weight:800;line-height:1}
+  .topbar .cd .box .l{font-size:11px;opacity:.9;margin-top:2px}
+  .wrap{max-width:1040px;margin:0 auto;padding:16px 22px 40px}
+  section{display:none;animation:fade .18s ease}
+  section.on{display:block}
+  @keyframes fade{from{opacity:.3;transform:translateY(4px)}to{opacity:1;transform:none}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:0 1px 2px rgba(20,32,44,.04)}
+  .card h3{margin:0 0 12px;font-size:15px;display:flex;align-items:center;gap:7px}
+  .card h3 .dot{width:8px;height:8px;border-radius:50%;background:var(--brand)}
+  .muted{color:var(--sub);font-size:13px}
+  .pill{display:inline-block;font-size:12px;padding:2px 9px;border-radius:999px;background:var(--chip);color:var(--brand);font-weight:600}
+  .pill.g{background:#e7f6ec;color:var(--ok)} .pill.w{background:#fef3e2;color:var(--warn)} .pill.r{background:#fdeaea;color:var(--bad)}
+  .note{border-left:4px solid var(--brand);background:var(--brand2);padding:9px 12px;border-radius:8px;font-size:13px;margin:8px 0}
+  .note.w{border-color:var(--warn);background:#fff8ef} .note.r{border-color:var(--bad);background:#fff5f5}
+  ul.tk{list-style:none;margin:0;padding:0}
+  ul.tk li{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line)}
+  ul.tk li:last-child{border-bottom:0}
+  ul.tk input[type=checkbox]{width:19px;height:19px;margin-top:2px;accent-color:var(--brand);flex:0 0 auto}
+  ul.tk li.done label{text-decoration:line-through;color:var(--sub)}
+  ul.tk label{flex:1}
+  .slot{display:flex;gap:8px;font-size:13px;padding:7px 0;border-bottom:1px dashed var(--line)}
+  .slot:last-child{border:0}
+  .slot .tm{flex:0 0 92px;color:var(--brand);font-weight:600}
+  .slot .ds{flex:1}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .kv{font-size:13px;padding:7px 0;border-bottom:1px solid var(--line)}
+  .kv:last-child{border:0}
+  .kv b{color:var(--ink)}
+  .phase{border-left:3px solid var(--brand);padding:4px 0 4px 12px;margin:12px 0}
+  .phase .ph{font-weight:700;font-size:14px}
+  .phase .dt{font-size:12px;color:var(--sub)}
+  .phase .pd{font-size:13px;margin-top:3px}
+  button{font-family:inherit;border:0;cursor:pointer;border-radius:10px;font-size:14px;padding:10px 14px;font-weight:600}
+  .btn{background:var(--brand);color:#fff}
+  .btn.ghost{background:#eef2ff;color:var(--brand)}
+  .btn.line{background:#fff;border:1px solid var(--line);color:var(--ink)}
+  input[type=number],input[type=text],textarea,select{font-family:inherit;font-size:14px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);width:100%}
+  textarea{resize:vertical;min-height:60px}
+  .hrs{display:flex;align-items:center;gap:8px;margin-top:6px}
+  .hrs input{width:90px}
+  .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;font-size:11px;text-align:center}
+  .cal .d{padding:7px 0;border-radius:8px;background:#f3f6fb;position:relative}
+  .cal .d.hd{background:transparent;color:var(--sub);font-weight:700}
+  .cal .d.today{outline:2px solid var(--brand)}
+  .cal .d .dot{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:var(--ok)}
+  .cal .d.exam{background:#fdeaea;color:var(--bad);font-weight:700}
+  details{margin:8px 0} details summary{cursor:pointer;font-weight:600;font-size:14px;padding:6px 0}
+  .exp{padding:6px 0;font-size:13px;border-bottom:1px dashed var(--line)}
+  .exp:last-child{border:0}
+  .exp b{color:var(--brand)}
+  canvas{width:100%;height:160px;display:block}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#16202c;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;opacity:0;transition:.25s;z-index:50;pointer-events:none}
+  .toast.on{opacity:.95}
+  .small{font-size:12px;color:var(--sub)}
+  @media(max-width:680px){
+    :root{--sideW:62px}
+    .sidebar .logo small{display:none}
+    .sidebar nav a{justify-content:center;padding:11px 4px}
+    .sidebar nav a .tx{display:none}
+    .sidebar .ft{display:none}
+    .topbar .cd .box .n{font-size:17px}
+  }
+  /* AI 助手 */
+  #s_ai .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+  #s_ai input,#s_ai select,#s_ai textarea{font:inherit;font-size:13px;border:1px solid var(--bd);border-radius:8px;padding:8px 10px;background:var(--card);color:var(--text)}
+  #s_ai input#aiKey{width:min(320px,70vw)}
+  #s_ai textarea{width:100%;min-height:64px;resize:vertical;box-sizing:border-box}
+  #aiMsgs{display:flex;flex-direction:column;gap:10px;max-height:46vh;overflow:auto;padding:4px 2px}
+  #aiMsgs .m{padding:10px 12px;border-radius:12px;font-size:14px;line-height:1.55;white-space:pre-wrap;word-break:break-word;max-width:92%}
+  #aiMsgs .u{align-self:flex-end;background:#2f6fed;color:#fff;border-bottom-right-radius:3px}
+  #aiMsgs .ai{align-self:flex-start;background:var(--card);border:1px solid var(--bd);border-bottom-left-radius:3px}
+  #s_ai .note.ai{background:#f3f7ff;border-color:#2f6fed}
+  #s_ai .btn{font:inherit;font-size:13px;border:1px solid var(--bd);background:var(--card);color:var(--text);border-radius:8px;padding:8px 14px;cursor:pointer}
+  #s_ai .btn.primary{background:#2f6fed;color:#fff;border-color:#2f6fed}
+  #s_ai .btn:disabled{opacity:.5;cursor:not-allowed}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="logo">考研助手 · 27<small>深大 085401 · 新一代电子信息</small></div>
+  <nav>
+    <a href="#" data-tab="today" class="on"><span class="ic">🏠</span><span class="tx">今日</span></a>
+    <a href="#" data-tab="plan"><span class="ic">🗺️</span><span class="tx">计划</span></a>
+    <a href="#" data-tab="subj"><span class="ic">📚</span><span class="tx">科目</span></a>
+    <a href="#" data-tab="rev"><span class="ic">🔁</span><span class="tx">复盘</span></a>
+    <a href="#" data-tab="prof"><span class="ic">📋</span><span class="tx">档案</span></a>
+    <a href="#" data-tab="data"><span class="ic">📊</span><span class="tx">数据</span></a>
+    <a href="#" data-tab="help"><span class="ic">💡</span><span class="tx">说明</span></a>
+    <a href="#" data-tab="ai"><span class="ic">🤖</span><span class="tx">AI助手</span></a>
+  </nav>
+  <div class="ft">双击本地文件即可离线使用<br>数据存本机</div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="t1">考研助手 · 27<small>深大 085401 · 新一代电子信息</small></div>
+    <div class="cd">
+      <div class="box"><div class="n" id="cdExam">--</div><div class="l">距初试(12/19)</div></div>
+      <div class="box"><div class="n" id="cdStart">--</div><div class="l">距启动(8/1)</div></div>
+    </div>
+  </div>
+
+  <div class="wrap">
+  <!-- 今日 -->
+  <section id="s_today" class="on">
+    <div class="card">
+      <h3><span class="dot"></span>今日任务 <span class="pill" id="todayPeriod">--</span></h3>
+      <div class="muted" id="todayDate"></div>
+      <div id="todayTasks"></div>
+      <div id="customTasks"></div>
+      <div class="hrs">
+        <span class="muted">今日学时：</span>
+        <input type="number" id="hrsInput" min="0" max="16" step="0.5" placeholder="0">
+        <span class="muted">h</span>
+        <span class="pill" id="hrsTarget"></span>
+      </div>
+      <div class="note" id="todayNote"></div>
+    </div>
+    <div class="card" id="launchPreview">
+      <h3><span class="dot"></span>启动周预览（8/1–8/6 · 在家全天）</h3>
+      <div class="muted">详见「计划」页 → 启动周。核心四件事：下载离线网课 / 搭笔记错题本框架 / 高数基础前9讲 / 信号前8讲。政治·线代·概率·通信原理·作文 暂不碰。</div>
+    </div>
+  </section>
+
+  <!-- 计划 -->
+  <section id="s_plan">
+    <div class="card">
+      <h3><span class="dot"></span>全程阶段（8/1 → 12/20）</h3>
+      <div id="phases"></div>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>培训期·工作日模板（5h 碎片）</h3>
+      <div class="slot"><div class="tm">早 6:40-8:00</div><div class="ds">数学高数/强化 1 讲 + 题；错题本三栏录入（1.3h）</div></div>
+      <div class="slot"><div class="tm">午 12:40-13:20</div><div class="ds">英语单词本复盘 / 阅读精读 1 篇（0.7h）</div></div>
+      <div class="slot"><div class="tm">晚 19:30-23:00</div><div class="ds">802 信号/通信 1 讲 + 吴大正；线代/概率(kira)；周中错题重做（3h）</div></div>
+      <div class="note w">国庆是否放假<strong>待定</strong>：在你确认前，10 月按不放假、工作日节奏推进，不插 7 天集中窗口。政治 10/1 起才进晚段。</div>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>培训期·周末模板（8–10h）</h3>
+      <ul class="tk"><li><label>数学强化/线代/概率 3h</label></li><li><label>802 信号与系统 + 通信原理 3h</label></li><li><label>英语阅读 + 单词 2h</label></li><li><label>政治（10/1 后）选择题 1.5h</label></li><li><label>错题本整理 + 周复盘 1h</label></li></ul>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>全天冲刺模板（11/8–12/18 · 41 天）</h3>
+      <ul class="tk"><li><label>数学套卷/强化 4h</label></li><li><label>802 真题/套卷 4h</label></li><li><label>英语阅读 + 作文(石雷鹏) 2.5h</label></li><li><label>政治背诵 + 选择题 2h</label></li><li><label>错题重做 + 周/月复盘 1.5h</label></li></ul>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>启动周拆解（8/1–8/6）</h3>
+      <div id="launchList"></div>
+    </div>
+  </section>
+
+  <!-- 科目 -->
+  <section id="s_subj">
+    <div class="card">
+      <h3><span class="dot"></span>师资与资源（已定 · 不另推荐）</h3>
+      <div id="subjList"></div>
+      <div class="note">概率论已定 <b>kira</b>（全程不换）。基础薄弱 + 不死磕偏怪难题：遇到偏/怪题直接跳过，时间压在高频考点与框架性核心内容。</div>
+    </div>
+  </section>
+
+  <!-- 复盘 -->
+  <section id="s_rev">
+    <div class="card">
+      <h3><span class="dot"></span>你的复盘方法论（原文保留）</h3>
+      <div id="revOriginal"></div>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>本周复盘（按你的框架）</h3>
+      <div class="muted">周复盘 0.5–1h：哪天效率低 / 哪科加强 / 哪科可放 / 看见进步。本周键：<b id="weekKey"></b></div>
+      <div class="kv"><span class="muted">效率低的那天</span><textarea id="rvLow" placeholder="例如：周三培训项目赶工，晚段只学了1.5h"></textarea></div>
+      <div class="kv"><span class="muted">需要加强的科目</span><textarea id="rvUp" placeholder="例如：802 通信原理的调制解调"></textarea></div>
+      <div class="kv"><span class="muted">可以稍放的科目</span><textarea id="rvDown" placeholder="例如：英语单词可降频，保阅读手感"></textarea></div>
+      <div class="kv"><span class="muted">看见的进步</span><textarea id="rvPro" placeholder="例如：高数二重积分听懂了套路"></textarea></div>
+      <button class="btn" id="rvSave" style="margin-top:8px;width:100%">保存本周复盘</button>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>复盘容易踩的坑（原文保留）</h3>
+      <ul class="tk" id="revPit"></ul>
+    </div>
+  </section>
+
+  <!-- 档案 -->
+  <section id="s_prof">
+    <div class="card">
+      <h3><span class="dot"></span>固定档案（提示词 v2 · 事实源）</h3>
+      <details open><summary>1. 报考目标</summary>
+        <div class="exp">深圳大学 电子与信息工程学院 · <b>085401 新一代电子信息技术（专硕）</b></div>
+        <div class="exp">初试：[101]政治 / [201]英语一 / [301]数学一 / [802]电子信息与通信系统综合</div>
+        <div class="exp">802 = 信号与系统 + 通信原理；参考书：吴大正《信号与线性系统分析》第5版、奥本海姆《信号与系统》第2版</div>
+        <div class="exp">25 年参考：复试线 <b>313</b>、录取最高 357、802 单科 118/55（以最新公告为准）</div>
+        <div class="exp">考试：2027 级初试，预计 <b>2026-12-19/20</b>（以教育部公告为准）</div>
+      </details>
+      <details><summary>2. 战略定位</summary>
+        <div class="exp">一战练兵 + 争取上岸双轨。首要 KPI：走完全程、四场考完、沉淀资产（笔记/错题本/真题手感）</div>
+        <div class="exp">次要 KPI：分数摸复试线。未过线则 27 年 3 月二战，直接从<b>强化</b>起步</div>
+        <div class="exp">→ 不采纳「基础不牢重来一遍」；优先能形成长期资产的投入</div>
+      </details>
+      <details><summary>3. 时间约束（硬条件）</summary>
+        <div class="exp">起点 2026-08-01；8/1–8/6 在家全天</div>
+        <div class="exp">8/7–11/7 广州脱产培训：工作日 早6:40-8:00 / 午12:40-13:20 / 晚19:30-23:00 ≈ <b>5h</b>；周末 8–10h</div>
+        <div class="exp">11/8–12/18 培训结束全天可用（41 天）</div>
+        <div class="exp">任何计划须能在工作日 5h 碎片执行，不给整块 8h 方案</div>
+      </details>
+      <details><summary>4. 师资与资源</summary>
+        <div class="exp">数学高数：张宇（基础/强化），<b>二重积分单独听武忠祥</b></div>
+        <div class="exp">数学线代：kira（基础）→ 李永乐（强化）</div>
+        <div class="exp">数学概率：kira（基础）→ 李永乐（强化），已定不换</div>
+        <div class="exp">英语一：柴荣；作文：石雷鹏（10 月下旬进场）</div>
+        <div class="exp">802 信号与系统：风中醉风；802 通信原理：张锦浩</div>
+        <div class="exp">政治：待定（徐涛/腿姐/苏一 任选）；<b>10/1 才开，此前不排</b></div>
+      </details>
+      <details><summary>5. 基础水平与难度策略</summary>
+        <div class="exp">各科基础都薄弱；不死磕偏怪难题，偏/怪题直接跳过</div>
+        <div class="exp">基础不牢也不从头重来，能往前走就往前走</div>
+      </details>
+      <details><summary>6. 我的复盘规划（原文照录）</summary>
+        <div class="exp" id="profRev"></div>
+      </details>
+      <details><summary>7. 待补充（仅剩一项）</summary>
+        <div class="exp">国庆是否放假：尚未确认。确认前 10 月按不放假兜底，不插 7 天窗口</div>
+      </details>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>回答规范（顾问模式）</h3>
+      <div class="exp">① 计划落到具体日期+时段 ② 资源优先级 802≥数学>英语>政治 ③ 标耗时并检查不超时</div>
+      <div class="exp">④ 深大政策/分数线标年份，不确定写「以最新公告为准」⑤ 说「不行」直接砍任务重排</div>
+      <div class="exp">⑥ 语气直接、说人话 ⑦ 偏怪题提醒跳过，服从不死磕</div>
+    </div>
+  </section>
+
+  <!-- 数据 -->
+  <section id="s_data">
+    <div class="card">
+      <h3><span class="dot"></span>近 14 天学时</h3>
+      <canvas id="chart"></canvas>
+      <div class="row" style="display:flex;justify-content:space-between;margin-top:8px">
+        <span class="small" id="sum14"></span>
+        <span class="small" id="avg14"></span>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>本月打卡</h3>
+      <div class="cal" id="cal"></div>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>数据备份</h3>
+      <div class="row" style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn ghost" id="btnExport">导出 JSON</button>
+        <button class="btn line" id="btnImport">导入 JSON</button>
+        <input type="file" id="fileInput" accept="application/json" style="display:none">
+      </div>
+      <div class="muted" style="margin-top:8px">数据仅存本机。广州培训期网络不稳，<b>每周日务必导出一次</b>防丢。</div>
+    </div>
+  </section>
+
+  <!-- 说明 -->
+  <section id="s_help">
+    <div class="card">
+      <h3><span class="dot"></span>这是什么 & 怎么用</h3>
+      <div class="exp">本工具是<b>默认离线</b>考研助手：把你的目标、计划、师资、复盘方法论和每日打卡集中在一处，纯本地运行，<b>不联网也能用</b>；如需手机与电脑数据互通，可在本页底部开启「☁️ 云同步」。</div>
+      <div class="exp"><b>左侧导航</b>切换模块（手机窄屏会收成图标栏，点图标即可）。所有数据存在你本机浏览器里，不上传。</div>
+      <div class="note">重要：培训期网络不稳，<b>每周日务必在「数据」页导出一次 JSON 备份</b>；换设备、清缓存前也导出。</div>
+    </div>
+
+    <div class="card">
+      <h3><span class="dot"></span>🏠 今日</h3>
+      <div class="exp"><b>功能：</b>顶部双倒计时（距初试 12/19、距启动 8/1）；按你当前阶段（启动周 / 培训工作日 / 周末 / 冲刺 / 考试 / 已结束）自动派发当日任务清单；记录今日学时并对比目标。</div>
+      <div class="exp"><b>操作：</b>① 逐项勾选已完成任务，勾选即时保存（绿色删除线表示完成）。② 学完在「今日学时」框填小时数（如 5.5），系统对比当日目标并提示是否达标。③ 8/1 前显示「启动周预览」，先照着准备。</div>
+    </div>
+
+    <div class="card">
+      <h3><span class="dot"></span>🗺️ 计划</h3>
+      <div class="exp"><b>功能：</b>全程 10 个阶段时间轴（P1 启动周 → 考试）；培训期工作日 / 周末 / 全天冲刺三套时段模板；启动周 8/1–8/6 逐日拆解。国庆标注「待定兜底」。</div>
+      <div class="exp"><b>操作：</b>这是<b>参照模板</b>，不用打卡。照着对应阶段 / 模板推进；任务重排或砍量以你的实际时间为准（工作日只有 5 小时碎片）。</div>
+    </div>
+
+    <div class="card">
+      <h3><span class="dot"></span>📚 科目</h3>
+      <div class="exp"><b>功能：</b>四科八项师资映射（数学高数/线代/概率、英语一/作文、802 信号/通信、政治），含关键提醒（二重积分听武忠祥、kira 概率不换、政治 10/1 才开）。</div>
+      <div class="exp"><b>操作：</b>纯查阅。按老师推进，<b>不要中途换老师</b>（沉没成本最高）。基础薄弱 + 不死磕偏怪难题，遇到偏/怪题直接跳过。</div>
+    </div>
+
+    <div class="card">
+      <h3><span class="dot"></span>🔁 复盘</h3>
+      <div class="exp"><b>功能：</b>你的复盘方法论原文（英语阅读/作文、专业课、政治、日/周/月复盘，一字未改）；「复盘容易踩的坑」五条原文；「本周复盘」表单（按你的框架，本地保存）。</div>
+      <div class="exp"><b>操作：</b>每周填一次「本周复盘」四个空（效率低那天 / 需加强科目 / 可稍放科目 / 看见的进步），点「保存本周复盘」即存本机，按月可回看。合上本子能讲出「考什么、为什么错、下次怎么避免」才是真复盘。</div>
+    </div>
+
+    <div class="card">
+      <h3><span class="dot"></span>📋 档案</h3>
+      <div class="exp"><b>功能：</b>固定档案七节（目标 / 战略定位 / 时间约束 / 师资 / 基础水平 / 复盘规划 / 待补充）+ 回答规范。等于把那份提示词装进口袋，离线可查。</div>
+      <div class="exp"><b>操作：</b>纯查阅。需要确认某个事实（802 范围、时间节点、国庆待定）时翻这里。</div>
+    </div>
+
+    <div class="card">
+      <h3><span class="dot"></span>📊 数据</h3>
+      <div class="exp"><b>功能：</b>近 14 天学时柱状图（合计/日均）；本月打卡日历（今天、考试日高亮，有打卡的日期显示绿点）；JSON 导出 / 导入。</div>
+      <div class="exp"><b>操作：</b>① 看学时曲线和日历了解节奏。② 点「导出 JSON」下载备份到本机；点「导入 JSON」选之前的备份文件即可恢复（换手机 / 清缓存后用）。<b>每周日务必导出一次。</b></div>
+    </div>
+
+    <div class="card">
+      <h3><span class="dot"></span>💡 通用操作贴士</h3>
+      <ul class="tk">
+        <li><label><b>离线 & 双击打开：</b>桌面「考研助手27.vbs」（或浏览器直接打开 HTML）即可，无需联网、无需服务器。手机用浏览器访问线上链接并「添加到主屏幕」。</label></li>
+        <li><label><b>数据存哪：</b>全部在本机浏览器 localStorage。清缓存 / 换设备会丢，所以每周导出 JSON。</label></li>
+        <li><label><b>切换模块：</b>点左侧导航；手机窄屏点图标切换。</label></li>
+        <li><label><b>目标学时：</b>未启动 0h；启动周 9h；培训工作日 5h；周末 9h；冲刺 13h。填了学时自动对比。</label></li>
+        <li><label><b>还没开始：</b>8/1 前「今日」只显示预览，先把网课清单和笔记框架想清楚。</label></li>
+      </ul>
+    </div>
+
+    <div class="card" id="syncCard">
+      <h3><span class="dot"></span>☁️ 云同步（手机↔电脑 数据互通）</h3>
+      <div class="exp">把备考数据存到你的 <b>GitHub 私有 Gist</b>，多台设备填同一个 Token 即自动同步。同步内容<b>不含 AI Key</b>，Token 仅存本机。建议用 <b>https 线上版</b>开启（本地双击 file:// 版可能被浏览器 CORS 拦截）。</div>
+      <div class="row" style="flex-wrap:wrap;gap:8px">
+        <input type="password" id="gistToken" placeholder="GitHub Personal Access Token" autocomplete="off" style="width:min(320px,70vw)">
+        <button class="btn" id="saveGistToken">保存令牌</button>
+        <span class="small" id="gistTokenStatus"></span>
+      </div>
+      <div class="row" style="flex-wrap:wrap;gap:8px;margin-top:8px">
+        <button class="btn line" id="initGist">初始化云端</button>
+        <button class="btn line" id="pushBtn">⬆️ 上传到云端</button>
+        <button class="btn line" id="pullBtn">⬇️ 从云端拉取</button>
+        <label class="small" style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="autoSync"> 自动同步（改动即上传）</label>
+      </div>
+      <div class="muted" style="margin-top:8px" id="syncStatus">未初始化</div>
+      <div class="note">首次：用一台设备点「初始化云端」创建私有仓库；其他设备点「从云端拉取」即可对齐。之后任一边改动会自动上传覆盖，<b>最后操作的设备为准</b>。</div>
+    </div>
+  </section>
+
+  <section id="s_ai">
+    <div class="card">
+      <h3><span class="dot"></span>🤖 AI 备考助手（DeepSeek）</h3>
+      <div class="exp">填入你的 DeepSeek API Key，即可在下方直接对话。它会<b>自动带上你的固定档案</b>（院校/科目/师资/时间约束/复盘原文），不用每次重述背景。Key <b>只存在你本机浏览器</b>，不会上传给我或任何第三方（仅发给 DeepSeek 官方 API）。它已接入<b>工具能力</b>：可按你的指令直接记录学时、勾选/添加任务、保存周复盘、修改师资，改完即时写进本机数据并刷新对应页面。</div>
+      <div class="exp">已适配 <b>DeepSeek V4</b>：旧模型 deepseek-chat / deepseek-reasoner 已于 2026/07/24 弃用，默认调用 <b>deepseek-v4-flash</b>。</div>
+      <div class="note ai">⚠️ 安全提示：Key 等同账户密码，不要发给我或截图外传；本工具不收集它。手机端每台设备填一次即可。</div>
+      <div class="row">
+        <input type="password" id="aiKey" placeholder="粘贴 DeepSeek API Key（sk-...）" autocomplete="off">
+        <button class="btn" id="aiSaveKey">保存 Key</button>
+        <span class="small" id="aiKeyStatus"></span>
+      </div>
+      <div class="row">
+        <label class="small">模型</label>
+        <select id="aiModel">
+          <option value="deepseek-v4-flash">deepseek-v4-flash（V4 默认，快 / 便宜）</option>
+          <option value="deepseek-v4-pro">deepseek-v4-pro（更强推理，约贵 3 倍）</option>
+        </select>
+        <label class="small"><input type="checkbox" id="aiThink"> 深度思考</label>
+        <span class="small">对话记录刷新页面后清空，属正常。</span>
+      </div>
+    </div>
+    <div class="card">
+      <div id="aiMsgs"></div>
+      <div class="row" style="align-items:flex-end">
+        <textarea id="aiInput" placeholder="问点什么？例如：我周三只有晚上3小时，怎么排数学和802？"></textarea>
+        <button class="btn primary" id="aiSend">发送</button>
+      </div>
+      <div class="small">快捷键：Ctrl/⌘ + Enter 发送。⚠️ 若开着「深度思考」又让 AI 办事（调工具），个别情况可能不稳——建议：纯咨询开深度思考，让 AI 改数据时就关掉。若提示跨域(CORS)/网络错误，多为断网或浏览器拦截，联网重试；持续 CORS 报错可让我加本地代理。</div>
+    </div>
+  </section>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+const EXAM=new Date("2026-12-19T00:00:00");
+const START=new Date("2026-08-01T00:00:00");
+const DAY=86400000;
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const tStr=d=>{const x=new Date(d);return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0");};
+const todayStr=()=>tStr(new Date());
+const days=d=>Math.ceil((d-Date.now())/DAY);
+
+/* ---------- 存储（file:// 兜底） ---------- */
+const LS=(()=>{try{const k="__t";localStorage.setItem(k,"1");localStorage.removeItem(k);return localStorage;}catch(e){const m={};return{getItem:k=>k in m?m[k]:null,setItem:(k,v)=>{m[k]=String(v);},removeItem:k=>{delete m[k];}};}})();
+const K={h:"ky_hrs",t:"ky_tasks",r:"ky_review",ct:"ky_custask"};
+const load=k=>{try{return JSON.parse(LS.getItem(k))||{}}catch(e){return{}}};
+const save=(k,v)=>{try{LS.setItem(k,JSON.stringify(v));}catch(e){}};
+const getH=d=>load(K.h)[d]||0;
+const setH=(d,v)=>{const o=load(K.h);o[d]=v;save(K.h,o);};
+const getT=d=>load(K.t)[d]||{};
+const setT=(d,o)=>{const m=load(K.t);m[d]=o;save(K.t,m);};
+
+/* ---------- 周期判定 ---------- */
+function period(d){
+  const x=new Date(d+"T00:00:00");
+  if(x<START) return "pre";
+  if(x<=new Date("2026-08-06")) return "launch";
+  if(x<=new Date("2026-11-07")) return (x.getDay()===0||x.getDay()===6)?"weekend":"workday";
+  if(x<=new Date("2026-12-18")) return "sprint";
+  if(x<=new Date("2026-12-20")) return "exam";
+  return "done";
+}
+const TARGET={pre:0,launch:9,workday:5,weekend:9,sprint:13,exam:0,done:0};
+const PTEXT={pre:"未启动",launch:"启动周(在家)",workday:"培训·工作日",weekend:"培训·周末",sprint:"全天冲刺",exam:"考试周",done:"已结束"};
+const TASKS={
+  launch:["下载离线网课到平板/手机(政治除外)","搭笔记/错题本框架(数学/802/英语单词/错题三栏)","张宇高数基础课+对应题","风中醉风信号与系统基础课+吴大正","柴荣词汇/长难句+单词本录入","错题本按三栏录入","周复盘(按你的框架)"],
+  workday:["早·数学高数或强化1讲+题","早·错题本三栏录入","午·英语单词本复盘/阅读精读1篇","晚·802信号或通信1讲+吴大正","晚·线代/概率(kira)","晚·周中错题重做"],
+  weekend:["数学强化/线代/概率 3h","802 信号与系统+通信原理 3h","英语阅读+单词 2h","政治(10/1后)选择题 1.5h","错题本整理+周复盘 1h"],
+  sprint:["数学套卷/强化 4h","802 真题/套卷 4h","英语阅读+作文(石雷鹏) 2.5h","政治背诵+选择题 2h","错题重做+周/月复盘 1.5h"],
+  exam:["调整作息，不刷题","过一遍错题本与作文模板","带齐证件，正常发挥"],
+  done:["全程走完，沉淀的资产留给二战直接用"]
+};
+
+/* ---------- 倒计时 ---------- */
+function renderCD(){
+  $("#cdExam").textContent=Math.max(0,days(EXAM));
+  $("#cdStart").textContent=Math.max(0,days(START));
+}
+
+/* ---------- 今日 ---------- */
+function renderToday(){
+  const d=todayStr(), p=period(d);
+  $("#todayDate").textContent=d+" · "+["周日","周一","周二","周三","周四","周五","周六"][new Date().getDay()];
+  $("#todayPeriod").textContent=PTEXT[p];
+  const host=$("#todayTasks"); host.innerHTML="";
+  if(p==="pre"){
+    $("#launchPreview").style.display="";
+    $("#todayNote").textContent="还没启动。先把网课清单、笔记框架想清楚；启动周计划已就绪（见「计划」页）。";
+    $("#hrsTarget").textContent="目标 0h";
+    $("#hrsInput").value=""; $("#hrsInput").disabled=true;
+  }else{
+    $("#launchPreview").style.display="none";
+    $("#hrsInput").disabled=false;
+    const list=TASKS[p]||[];
+    const done=getT(d);
+    if(!list.length){host.innerHTML='<div class="muted">本周期无预设任务，按「计划」页模板自习。</div>';}
+    list.forEach((t,i)=>{
+      const li=document.createElement("li");
+      if(done[i]) li.className="done";
+      li.innerHTML='<input type="checkbox" data-i="'+i+'" '+(done[i]?"checked":"")+'><label>'+t+'</label>';
+      host.appendChild(li);
+    });
+    host.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+      cb.onchange=()=>{const o=getT(d);o[+cb.dataset.i]=cb.checked;setT(d,o);renderToday();toast("已保存");};
+    });
+    $("#hrsInput").value=getH(d)||"";
+    $("#hrsTarget").textContent="目标 "+TARGET[p]+"h";
+    const h=getH(d);
+    $("#todayNote").textContent = h>0 ? ("今日已记 "+h+"h"+(h>=TARGET[p]?"，达标 ✓":"，距目标还差 "+(TARGET[p]-h)+"h")) : "还没记学时，学完填一下。";
+  }
+  renderCustomTasks(d);
+}
+function renderCustomTasks(d){
+  const host=$("#customTasks"); if(!host)return; host.innerHTML="";
+  const arr=load(K.ct)[d]||[];
+  if(!arr.length)return;
+  const hd=document.createElement("div"); hd.className="muted"; hd.style.marginTop="8px"; hd.textContent="自定义任务（可让 AI 助手添加）"; host.appendChild(hd);
+  arr.forEach(c=>{
+    const li=document.createElement("li");
+    if(c.done)li.className="done";
+    li.innerHTML='<input type="checkbox" data-cid="'+c.id+'" '+(c.done?"checked":"")+'><label>'+c.text+'</label><span data-del="'+c.id+'" style="margin-left:auto;cursor:pointer;color:var(--bad);font-weight:700">×</span>';
+    host.appendChild(li);
+  });
+  host.querySelectorAll('input[data-cid]').forEach(cb=>{
+    cb.onchange=()=>{const m=load(K.ct);const it=(m[d]||[]).find(x=>x.id===cb.dataset.cid);if(it){it.done=cb.checked;save(K.ct,m);renderToday();toast("已保存");};};
+  });
+  host.querySelectorAll('[data-del]').forEach(x=>{
+    x.onclick=()=>{const m=load(K.ct);m[d]=(m[d]||[]).filter(y=>y.id!==x.dataset.del);save(K.ct,m);renderToday();toast("已删除");};
+  });
+}
+$("#hrsInput").addEventListener("input",e=>{
+  const v=parseFloat(e.target.value)||0; setH(todayStr(),v); renderData(); toast("学时已记 "+v+"h");
+});
+
+/* ---------- 计划 ---------- */
+const PHASES=[
+  ["P1 启动周","8/1–8/6（在家全天）","系统搭建：下载离线网课、搭笔记/错题本框架；高数基础前9讲；信号与系统前8讲。政治/线代/概率/通信原理/作文不碰。"],
+  ["P2 培训·基础","8/7–9/15（工作日5h/周末8-10h）","高数基础收尾+信号与系统基础深入；英语词汇/长难句/阅读持续。不打偏怪题。"],
+  ["P3 培训·强化起步","9/16–9/30","高数强化(张宇)；线代(kira→李永乐)、概率(kira→李永乐)插入；通信原理(张锦浩)开课。"],
+  ["P4 国庆窗口","10/1–10/7（待定兜底）","政治10/1开(徐涛/腿姐/苏一任选)；数学强化+802推进。国庆放假待定→不放假按工作日节奏。"],
+  ["P5 培训·强化深入","10/8–10/31","数学强化+802通信原理+政治选择题(看完课一天后做，错题回知识点)。"],
+  ["P6 培训·收尾","11/1–11/7","各科框架收口+真题预热；准备转入全天冲刺。"],
+  ["P7 全天冲刺","11/8–11/30（41天）","套卷/真题/强化全开：数学4h+802 4h+英语2.5h+政治2h+复盘1.5h。"],
+  ["P8 真题模拟","12/1–12/12","全真模考+错题重做；按你的复盘框架隔周重做错题。"],
+  ["P9 考前收口","12/13–12/18","背政治大题+作文模板(石雷鹏)；状态调整，不钻偏怪题。"],
+  ["考试","12/19–12/20","四场全部考完，沉淀资产留给二战。"]
+];
+function renderPlan(){
+  const h=$("#phases"); h.innerHTML="";
+  PHASES.forEach(p=>{
+    const d=document.createElement("div"); d.className="phase";
+    d.innerHTML='<div class="ph">'+p[0]+'</div><div class="dt">'+p[1]+'</div><div class="pd">'+p[2]+'</div>';
+    h.appendChild(d);
+  });
+  const ll=$("#launchList"); ll.innerHTML="";
+  const lw=[["8/1","系统搭建：下载离线网课(政治除外)；搭四类本子框架"],["8/2","高数基础1-3讲+题；信号1-2讲+吴大正；柴荣长难句"],["8/3","高数导数微分4-5讲；信号卷积3-4讲；阅读精读1篇"],["8/4","高数积分6-7讲(标二重积分)；信号傅里叶5-6讲；阅读2篇"],["8/5","高数定理/多元8-9讲；信号拉氏/Z 7-8讲；错题整理"],["8/6","高数+信号框架图+错题重做；周复盘；广州行前"]];
+  lw.forEach(x=>{const e=document.createElement("div");e.className="slot";e.innerHTML='<div class="tm">'+x[0]+'</div><div class="ds">'+x[1]+'</div>';ll.appendChild(e);});
+}
+
+/* ---------- 科目 ---------- */
+const SUBJ_SEED=[
+  ["数学·高数","张宇（基础/强化）","二重积分单独听武忠祥"],
+  ["数学·线代","kira（基础）→ 李永乐（强化）",""],
+  ["数学·概率","kira（基础）→ 李永乐（强化）","已定 kira，全程不换"],
+  ["英语一","柴荣（词汇/长难句/阅读）",""],
+  ["英语·作文","石雷鹏","10 月下旬进场"],
+  ["802·信号与系统","风中醉风",""],
+  ["802·通信原理","张锦浩",""],
+  ["政治","待定（徐涛/腿姐/苏一）","10/1 才开，此前不排"]
+];
+const SUBJ_KEY="ky_subj";
+function getSubj(){try{const s=LS.getItem(SUBJ_KEY);if(s)return JSON.parse(s);}catch(e){}return SUBJ_SEED.map(r=>r.slice());}
+function setSubj(arr){LS.setItem(SUBJ_KEY,JSON.stringify(arr));}
+function renderSubj(){
+  const h=$("#subjList"); h.innerHTML="";
+  getSubj().forEach(s=>{
+    const d=document.createElement("div"); d.className="kv";
+    d.innerHTML='<b>'+s[0]+'</b> · '+s[1]+(s[2]?' <span class="pill">'+s[2]+'</span>':'');
+    h.appendChild(d);
+  });
+}
+
+/* ---------- 复盘（原文保留） ---------- */
+const REV_ORIG=[
+  ["英语阅读","搞清楚正确选项在原文的哪里，错误选项错在哪里并归类（无中生有、答非所问、偷换概念、过度推理）；把不认识的词和熟词生意比记在单词本上，归纳总结错误原因。"],
+  ["英语作文","每个星期写一次作文，把范文好的句式记下来并改写。"],
+  ["专业课","注重题型归纳和解题思路梳理。建立错题本：记录三个东西（考什么知识点、错在哪一步、正确的思路是什么）；同类题型归纳，把同一类题型（例如求特征值）放在一起，总结归纳；隔一段时间（一周之后）重新做错题。"],
+  ["政治","选择题最好看完网课一天后做题（避免短期记忆蒙题），错题回归知识点，标注高频错误章节。一刷在答题本或小程序，二刷在题目上做（关注一刷错过的题还错没错），三刷（有时间的话）只做一刷二刷错过的题。每周花半小时把错题看一遍。"],
+  ["进度·日复盘","关注脑子里真正进了什么东西。"],
+  ["进度·周复盘","0.5-1小时，有没有哪天效率比较低，哪科需要加强，哪科可以稍微放一放；还可以看见进步。"],
+  ["进度·月复盘","花1-2小时总结，这个月每科完成了什么，下个月需要注重什么。"]
+];
+const REV_PIT=[
+  "把复盘变成自我攻击（这也不会那也忘了，开始焦虑自我否定）",
+  "复盘变成抄笔记（错题抄工整漂亮，实际是表面功夫，欺骗自己，叫手工课）。真正的复盘是合上本子后讲得出来：考什么、为什么错、下次怎么避免。",
+  "追求完美主义（要有优先级，高频考点、框架性核心内容，把时间花在刀刃上）",
+  "只复盘知识不复盘方法（方法错了，越努力越低效）",
+  "复盘流于形式（不是记流水账；有效复盘三要素：现状做了什么/完成多少、问题哪里没做好为什么、行动接下来怎么改）"
+];
+function renderRev(){
+  const h=$("#revOriginal"); h.innerHTML="";
+  REV_ORIG.forEach(r=>{const d=document.createElement("div");d.className="exp";d.innerHTML='<b>'+r[0]+'：</b>'+r[1];h.appendChild(d);});
+  const p=$("#revPit"); p.innerHTML="";
+  REV_PIT.forEach(t=>{const li=document.createElement("li");li.innerHTML='<label>'+t+'</label>';p.appendChild(li);});
+  const wk=weekKey(); $("#weekKey").textContent=wk;
+  const rv=load(K.r)[wk]||{};
+  $("#rvLow").value=rv.low||""; $("#rvUp").value=rv.up||""; $("#rvDown").value=rv.down||""; $("#rvPro").value=rv.pro||"";
+  $("#profRev").innerHTML=REV_ORIG.map(r=>'<b>'+r[0]+'：</b>'+r[1]).join('<br><br>');
+}
+function weekKey(){
+  const n=new Date(); const day=(n.getDay()+6)%7; const mon=new Date(n-day*DAY);
+  return "W"+tStr(mon);
+}
+$("#rvSave").onclick=()=>{
+  const wk=weekKey(); const o=load(K.r); o[wk]={low:$("#rvLow").value,up:$("#rvUp").value,down:$("#rvDown").value,pro:$("#rvPro").value};
+  save(K.r,o); toast("本周复盘已存 · "+wk);
+};
+
+/* ---------- 数据 ---------- */
+function renderData(){
+  const labels=[],vals=[]; const h=load(K.h);
+  for(let i=13;i>=0;i--){const d=new Date(Date.now()-i*DAY);const s=tStr(d);labels.push(s.slice(5));vals.push(h[s]||0);}
+  const cv=$("#chart"); const dpr=window.devicePixelRatio||1;
+  const W=cv.clientWidth||600,H=160; cv.width=W*dpr; cv.height=H*dpr;
+  const ctx=cv.getContext("2d"); ctx.scale(dpr,dpr); ctx.clearRect(0,0,W,H);
+  const max=Math.max(14,...vals); const bw=W/14;
+  ctx.fillStyle="#2f6fed";
+  vals.forEach((v,i)=>{const bh=v/max*(H-20);if(bh>0)ctx.fillRect(i*bw+3,H-bh,bw-6,bh);});
+  ctx.fillStyle="#6b7686"; ctx.font="10px sans-serif"; ctx.textAlign="center";
+  labels.forEach((l,i)=>{if(i%2===0)ctx.fillText(l,i*bw+bw/2,H-6);});
+  const sum=vals.reduce((a,b)=>a+b,0), avg=(sum/14).toFixed(1);
+  $("#sum14").textContent="14天合计 "+sum+"h"; $("#avg14").textContent="日均 "+avg+"h";
+  const cal=$("#cal"); cal.innerHTML="";
+  ["一","二","三","四","五","六","日"].forEach(x=>{const e=document.createElement("div");e.className="d hd";e.textContent=x;cal.appendChild(e);});
+  const now=new Date(); const y=now.getFullYear(),m=now.getMonth();
+  const first=new Date(y,m,1); let lead=(first.getDay()+6)%7;
+  for(let i=0;i<lead;i++){const e=document.createElement("div");e.className="d";e.textContent="";cal.appendChild(e);}
+  const dim=new Date(y,m+1,0).getDate();
+  const hh=load(K.h);
+  for(let d=1;d<=dim;d++){
+    const e=document.createElement("div"); e.className="d"; e.textContent=d;
+    const ds=tStr(new Date(y,m,d));
+    if(ds===todayStr()) e.classList.add("today");
+    if(ds>="2026-12-19"&&ds<="2026-12-20") e.classList.add("exam");
+    if((hh[ds]||0)>0){const dot=document.createElement("span");dot.className="dot";e.appendChild(dot);}
+    cal.appendChild(e);
+  }
+}
+$("#btnExport").onclick=()=>{
+  const data={h:load(K.h),t:load(K.t),r:load(K.r),exported:todayStr()};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="考研助手备份-"+todayStr()+".json"; a.click(); toast("已导出");
+};
+$("#btnImport").onclick=()=>$("#fileInput").click();
+$("#fileInput").onchange=e=>{
+  const f=e.target.files[0]; if(!f)return; const rd=new FileReader();
+  rd.onload=()=>{try{const o=JSON.parse(rd.result);
+    if(o.h)save(K.h,o.h); if(o.t)save(K.t,o.t); if(o.r)save(K.r,o.r);
+    renderToday();renderData();renderRev(); toast("导入成功");
+  }catch(err){toast("文件解析失败");}};
+  rd.readAsText(f);
+};
+
+/* ---------- AI 助手 ---------- */
+const AI_KEY="ky_aikey", AI_MOD="ky_aimod", AI_THINK="ky_aithink";
+const ARCHIVE_SYS=`你是一个通用的 AI 助手，可以回答我提出的任何问题——考研备考、学习方法、编程技术、生活决策、文案写作等都不限。下面是我（用户）的个人背景档案，供你了解我的情况、在涉及我的备考时作为参考；它不是对话的边界，你不必只聊考研，也不必每次复述这些已知信息：
+【报考目标】深圳大学电子与信息工程学院 085401 新一代电子信息技术（专硕）。初试：[101]政治/[201]英语一/[301]数学一/[802]电子信息与通信系统综合。802=信号与系统+通信原理，参考书：吴大正《信号与线性系统分析》第5版、奥本海姆《信号与线性系统》第2版。25年该专业复试线313分、录取最高357、802单科最高118/最低55。27级初试预计2026-12-19至20日。
+【战略定位】今年（26年12月）一战练兵+争取上岸双轨：首要KPI走完全程、四科全考完、沉淀可复用资产（笔记/错题本/真题手感）；次要KPI尽量摸复试线；出分未过线则27年3月二战从强化起步。凡是“基础不牢就重来一遍”的建议一律不采纳。
+【时间约束】起点2026-08-01。8/1-8/6在家全天可用；8/7-11/7广州脱产项目培训，工作日可用约5h（早6:40-8:00、午12:40-13:20、晚19:30-23:00），周末8-10h；国庆是否放假待定，按不放假兜底；11/8-12/18全天可用41天。任何计划必须能在工作日5h碎片时间执行，不要整块8h方案。
+【师资（已定勿换）】数学高数张宇（基础/强化），二重积分单独听武忠祥；线代kira基础→李永乐强化；概率kira基础→李永乐强化（已定kira全程不换）；英语一柴荣；作文石雷鹏（10月下旬进场）；802信号与系统中醉风；802通信原理张锦浩；政治10月1日才开始，此前不做任何政治安排。
+【基础水平】各科基础薄弱，难度策略不死磕偏怪难题，遇偏/怪题直接跳过，时间压高频考点与框架性核心内容；基础不牢也不从头重来。
+【复盘规划（用户原文，参考风格）】英语阅读：正确选项在原文哪、错误选项归类（无中生有/答非所问/偷换概念/过度推理），生词与熟词生意比记单词本；作文每周写一次、积累好句式改写；专业课建错题本（考什么知识点/错哪一步/正确思路），同类题型归纳，一周后重做；政治选择题看完课一天后做、错题回归知识点、一刷答题本二刷题目上三刷只做错过的；日复盘看脑子进了什么、周复盘0.5-1h、月复盘1-2h；复盘踩坑：不自我攻击、不抄笔记欺骗自己、不完美主义、不只复盘知识不复盘方法、不流于形式（现状/问题/行动三要素）。
+【回答规范】（以下规范仅在你聊备考话题时参考；聊其他话题按通用常识正常回答即可。）计划落到具体日期时段；资源优先级802≥数学一>英语一>政治，偏离须说明；标注预计耗时并检查是否超时；深大政策数据标年份、不确定写“以最新公告为准”不编造；用户说做不到就砍任务重排不安慰；语气直接说人话不鸡汤；偏怪题提醒跳过。
+【你的能力·工具】你不仅是顾问，还能直接动手修改用户的备考数据。当用户提出具体操作（记录学时、勾选任务、加个人安排、存复盘、改老师）时，优先调用对应工具执行，而不是只口头建议。工具清单：get_state（读取现状快照，任何修改前先调用）、log_hours（记某天学时）、toggle_task（勾选/取消预设任务）、add_custom_task（加自定义任务）、remove_custom_task（删自定义任务）、save_review（保存周复盘）、set_teacher（改科目老师，仅用户明确要求时）。任何修改前先 get_state 了解现状；修改后用一句话向用户确认你做了什么。注意：用户的固定档案（档案七节、复盘原文、阶段计划）是只读的，不要试图修改它们。`;
+
+/* ---------- AI 工具（agent 能力） ---------- */
+const TOOLS=[
+  {type:"function",function:{name:"get_state",description:"读取当前备考状态快照：今天的日期、所处阶段、目标学时、已记学时、今日预设任务完成度、自定义任务、本周复盘、科目师资表。做任何修改前先调用它了解现状。",parameters:{type:"object",properties:{}}}},
+  {type:"function",function:{name:"log_hours",description:"记录某天的学习学时（小时），写入数据页的学时统计。",parameters:{type:"object",properties:{date:{type:"string",description:"日期 YYYY-MM-DD，缺省用今天"},hours:{type:"number",description:"学时（小时），如 5.5"}},required:["hours"]}}},
+  {type:"function",function:{name:"toggle_task",description:"勾选或取消勾选某天某个预设任务。",parameters:{type:"object",properties:{date:{type:"string",description:"日期 YYYY-MM-DD，缺省今天"},index:{type:"integer",description:"预设任务序号，从0开始，见 get_state 返回的 today_tasks"},done:{type:"boolean",description:"true=完成,false=取消"}},required:["index","done"]}}},
+  {type:"function",function:{name:"add_custom_task",description:"给某天新增一条自定义任务（预设任务之外的个人安排）。",parameters:{type:"object",properties:{date:{type:"string",description:"日期 YYYY-MM-DD，缺省今天"},text:{type:"string",description:"任务内容，如「802 错题本 1h」"},subject:{type:"string",description:"可选科目标签，如 数学/802/英语/政治"}},required:["text"]}}},
+  {type:"function",function:{name:"remove_custom_task",description:"删除某天的一条自定义任务。",parameters:{type:"object",properties:{date:{type:"string",description:"日期 YYYY-MM-DD，缺省今天"},id:{type:"string",description:"自定义任务 id，见 get_state 返回的 custom_tasks"}},required:["id"]}}},
+  {type:"function",function:{name:"save_review",description:"保存本周复盘（周复盘框架：效率低那天/需加强科目/可稍放科目/看见的进步）。",parameters:{type:"object",properties:{low:{type:"string",description:"效率低的那天"},up:{type:"string",description:"需要加强的科目"},down:{type:"string",description:"可以稍放的科目"},pro:{type:"string",description:"看见的进步"}}}}},
+  {type:"function",function:{name:"set_teacher",description:"修改某科目的授课老师（师资表）。用户要求不轻易换老师，仅在用户明确要求时调用。",parameters:{type:"object",properties:{subject:{type:"string",description:"科目名，须与师资表一致，如「数学·高数」「802·通信原理」「政治」"},teacher:{type:"string",description:"新的老师描述，如「张宇（强化）」"}},required:["subject","teacher"]}}}
+];
+function callTool(name,args){
+  args=args||{}; const d=args.date||todayStr();
+  if(name==="get_state"){
+    const p=period(d);
+    const tasks=(TASKS[p]||[]).map((t,i)=>({index:i,text:t,done:!!(getT(d)[i])}));
+    const ct=(load(K.ct)[d]||[]).map(c=>({id:c.id,text:c.text,done:!!c.done}));
+    const wk=weekKey(); const rv=load(K.r)[wk]||{};
+    return JSON.stringify({date:d,period:PTEXT[p],target_hours:TARGET[p],logged_hours:getH(d),
+      today_tasks:tasks,custom_tasks:ct,week_key:wk,review:rv,subjects:getSubj().map(s=>({subject:s[0],teacher:s[1],note:s[2]||""}))});
+  }
+  if(name==="log_hours"){const h=parseFloat(args.hours);if(isNaN(h))return"错误：hours 非数字";setH(d,h);renderToday();renderData();return"已记录 "+d+" 学时 "+h+"h";}
+  if(name==="toggle_task"){const i=+args.index;const o=getT(d);o[i]=!!args.done;setT(d,o);renderToday();return(args.done?"已完成":"已取消")+" 任务#"+i;
+  }
+  if(name==="add_custom_task"){const m=load(K.ct);(m[d]=m[d]||[]).push({id:"c"+Date.now(),text:args.text,done:false});save(K.ct,m);renderToday();return"已添加自定义任务："+args.text;}
+  if(name==="remove_custom_task"){const m=load(K.ct);if(m[d]){m[d]=m[d].filter(c=>c.id!==args.id);save(K.ct,m);renderToday();return"已删除自定义任务";}return"未找到该任务";}
+  if(name==="save_review"){const wk=weekKey();const o=load(K.r);o[wk]={low:args.low||"",up:args.up||"",down:args.down||"",pro:args.pro||""};save(K.r,o);renderRev();return"已保存本周复盘 "+wk;}
+  if(name==="set_teacher"){const arr=getSubj();const it=arr.find(s=>s[0]===args.subject);if(!it)return"未找到科目："+args.subject+"（可选："+arr.map(s=>s[0]).join("、")+"）";it[1]=args.teacher;setSubj(arr);renderSubj();return"已将 "+args.subject+" 老师改为 "+args.teacher;}
+  return"未知工具："+name;
+}
+function aiNote(text){const d=document.createElement("div");d.className="m ai tn";d.style.opacity=".72";d.style.fontSize="12px";d.dataset.text=text;d.textContent=text;$("#aiMsgs").appendChild(d);$("#aiMsgs").scrollTop=$("#aiMsgs").scrollHeight;}
+function renderAIsetup(){
+  const k=LS.getItem(AI_KEY)||"";
+  $("#aiKey").value=k;
+  $("#aiKeyStatus").textContent=k?"Key 已保存（仅存本机）":"未设置";
+  $("#aiModel").value=LS.getItem(AI_MOD)||"deepseek-v4-flash";
+  $("#aiThink").checked=LS.getItem(AI_THINK)==="1";
+  if(!$("#aiMsgs").firstChild){
+    const w=document.createElement("div"); w.className="m ai";
+    w.dataset.text="你好，我是你的 AI 助手（已接入 DeepSeek，带工具能力）。备考相关问题我已了解你的背景，直接问或让我办事都行；其他任何问题——学习、技术、生活、文案…也随时问我，我会像通用 agent 一样解答。办事示例：给今天加一条「802 错题本 1h」、记一下今天学了 5 小时、把政治老师改成腿姐、保存本周复盘。";
+    w.textContent=w.dataset.text; $("#aiMsgs").appendChild(w);
+  }
+}
+$("#aiSaveKey") && ($("#aiSaveKey").onclick=()=>{
+  const v=$("#aiKey").value.trim(); if(!v){toast("Key 为空");return;}
+  LS.setItem(AI_KEY,v); renderAIsetup(); toast("Key 已保存");
+});
+$("#aiModel") && ($("#aiModel").onchange=()=>{LS.setItem(AI_MOD,$("#aiModel").value);});
+$("#aiThink") && ($("#aiThink").onchange=()=>{LS.setItem(AI_THINK,$("#aiThink").checked?"1":"0");});
+function aiAppend(role,text){
+  const d=document.createElement("div"); d.className="m "+(role==="user"?"u":"ai");
+  d.dataset.text=text; d.textContent=text;
+  $("#aiMsgs").appendChild(d); $("#aiMsgs").scrollTop=$("#aiMsgs").scrollHeight;
+}
+function aiBusy(b){const b2=$("#aiSend"); if(b2){b2.disabled=b; b2.textContent=b?"回复中…":"发送";}}
+async function sendAI(){
+  const key=LS.getItem(AI_KEY)||"";
+  if(!key){toast("请先填写并保存 API Key");return;}
+  const inp=$("#aiInput"); const text=inp.value.trim(); if(!text)return;
+  aiAppend("user",text); inp.value="";
+  const model=LS.getItem(AI_MOD)||"deepseek-v4-flash";
+  const sys=[{role:"system",content:ARCHIVE_SYS}];
+  const hist=[];
+  $$("#aiMsgs .m:not(.tn)").forEach(el=>{hist.push({role:el.classList.contains("u")?"user":"assistant",content:el.dataset.text});});
+  const recent=sys.concat(hist).slice(-20);
+  aiBusy(true);
+  try{
+    let callMsgs=recent.slice();
+    const MAX=6;
+    for(let step=0; step<MAX; step++){
+      const reqBody={model,messages:callMsgs,temperature:0.7,stream:false,tools:TOOLS,tool_choice:"auto"};
+      if(LS.getItem(AI_THINK)==="1"){reqBody.thinking={type:"enabled"};reqBody.reasoning_effort="high";}
+      const r=await fetch("https://api.deepseek.com/chat/completions",{
+        method:"POST",
+        headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},
+        body:JSON.stringify(reqBody)
+      });
+      if(!r.ok){
+        let msg="请求失败（"+r.status+"）";
+        if(r.status===401)msg="Key 无效或余额不足（401）";
+        else if(r.status===429)msg="额度耗尽或过于频繁（429）";
+        let err=""; try{err=(await r.text()).slice(0,160);}catch(e){}
+        aiAppend("ai","⚠️ "+msg+"\n"+err); break;
+      }
+      const j=await r.json();
+      const msg=j.choices&&j.choices[0]&&j.choices[0].message;
+      if(!msg){aiAppend("ai","⚠️ 返回结构异常");break;}
+      if(msg.tool_calls&&msg.tool_calls.length){
+        const names=msg.tool_calls.map(tc=>tc.function.name).join(", ");
+        aiNote("🔧 调用工具："+names);
+        callMsgs.push({role:"assistant",content:msg.content||"",tool_calls:msg.tool_calls});
+        for(const tc of msg.tool_calls){
+          let fargs={}; try{fargs=JSON.parse(tc.function.arguments||"{}");}catch(e){}
+          const res=callTool(tc.function.name,fargs);
+          callMsgs.push({role:"tool",tool_call_id:tc.id,content:String(res)});
+        }
+      }else{
+        aiAppend("ai",msg.content||"（空回复）"); break;
+      }
+    }
+  }catch(e){
+    let note="网络错误："+(e&&e.message||e);
+    if(e&&e.message&&e.message.indexOf("Failed to fetch")>=0)note+="（多为断网或浏览器跨域拦截；联网重试；持续 CORS 报错可让我加本地代理）";
+    aiAppend("ai","⚠️ "+note);
+  }finally{aiBusy(false);}
+}
+$("#aiSend") && ($("#aiSend").onclick=sendAI);
+$("#aiInput") && $("#aiInput").addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey))sendAI();});
+
+/* ---------- 左侧导航 ---------- */
+$$(".sidebar nav a").forEach(a=>{
+  a.onclick=ev=>{ev.preventDefault();
+    $$(".sidebar nav a").forEach(x=>x.classList.remove("on")); a.classList.add("on");
+    $$("main section, .wrap section, section").forEach(s=>{});
+    $$("section").forEach(s=>s.classList.remove("on"));
+    $("#s_"+a.dataset.tab).classList.add("on");
+    if(a.dataset.tab==="data")renderData();
+    if(a.dataset.tab==="ai")renderAIsetup();
+    $(".main").scrollTop=0;
+  };
+});
+
+/* ---------- toast ---------- */
+let tt; function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),1400);}
+
+/* ---------- init ---------- */
+renderCD(); renderToday(); renderPlan(); renderSubj(); renderRev(); renderData(); renderAIsetup();
+setInterval(renderCD,60000);
+/* 仅在 http(s) 下注册 Service Worker（file:// 双击打开时自动跳过，避免报错） */
+if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+/* ---------- 云同步（GitHub Gist） ---------- */
+const GIST_TOKEN="ky_gist_token", GIST_ID="ky_gist_id", SYNC_FILE="ky27-sync.json";
+const SYNC_KEYS=[K.h,K.t,K.r,K.ct,SUBJ_KEY];
+let _syncing=false,_pushT=null;
+function gistHeaders(){
+  const tok=LS.getItem(GIST_TOKEN)||"";
+  return {"Authorization":"Bearer "+tok,"Content-Type":"application/json","Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"};
+}
+function gistReq(path,opt){
+  opt=opt||{};
+  return fetch("https://api.github.com"+path,{method:opt.method||"GET",headers:gistHeaders(),body:opt.body?JSON.stringify(opt.body):undefined});
+}
+function collectSync(){const o={};SYNC_KEYS.forEach(k=>{const v=LS.getItem(k);if(v!=null)o[k]=v;});return o;}
+function applySync(obj){_syncing=true;SYNC_KEYS.forEach(k=>{if(k in obj)LS.setItem(k,obj[k]);});_syncing=false;renderToday();renderSubj();renderRev();renderData();}
+function syncStatus(t){const e=$("#syncStatus");if(e)e.textContent=t;}
+function schedulePush(){if(_syncing)return;clearTimeout(_pushT);_pushT=setTimeout(syncPush,800);}
+function buildPayload(){const data=collectSync();const files={};files[SYNC_FILE]={content:JSON.stringify(data)};return files;}
+async function syncPush(){
+  const id=LS.getItem(GIST_ID);
+  const files=buildPayload();
+  try{
+    let r;
+    if(id){ r=await gistReq("/gist/"+id,{method:"PATCH",body:{files:files}}); }
+    else{
+      r=await gistReq("/gists",{method:"POST",body:{description:"考研助手27 同步数据",public:false,files:files}});
+      if(r.ok){const j=await r.json();LS.setItem(GIST_ID,j.id);}
+    }
+    if(!r.ok)throw new Error("HTTP "+r.status);
+    syncStatus("已上传 "+new Date().toLocaleTimeString());
+  }catch(e){syncStatus("上传失败："+e.message);}
+}
+async function syncPull(){
+  const id=LS.getItem(GIST_ID);
+  if(!id){syncStatus("请先初始化云端");return;}
+  try{
+    const r=await gistReq("/gist/"+id);
+    if(!r.ok)throw new Error("HTTP "+r.status);
+    const j=await r.json();
+    const f=j.files&&j.files[SYNC_FILE];
+    const c=f&&f.content;
+    if(!c){syncStatus("云端暂无数据");return;}
+    applySync(JSON.parse(c));
+    syncStatus("已拉取 "+new Date().toLocaleTimeString());
+    toast("已从云端同步");
+  }catch(e){syncStatus("拉取失败："+e.message);}
+}
+const _LSset=LS.setItem.bind(LS);
+LS.setItem=function(k,v){_LSset(k,v);if(!_syncing&&SYNC_KEYS.indexOf(k)>=0&&LS.getItem(GIST_ID)&&$("#autoSync")&&$("#autoSync").checked)schedulePush();};
+function renderSyncUI(){
+  const tok=LS.getItem(GIST_TOKEN)||"",id=LS.getItem(GIST_ID)||"";
+  if($("#gistTokenStatus"))$("#gistTokenStatus").textContent=tok?"Token 已保存（仅本机）":"未设置";
+  if($("#gistToken")&&!tok)$("#gistToken").value="";
+  if($("#autoSync"))$("#autoSync").checked=LS.getItem("ky_autosync")==="1";
+  syncStatus(id?("已绑定 Gist："+id.slice(0,8)+"…"):"未初始化云端");
+}
+$("#saveGistToken") && ($("#saveGistToken").onclick=function(){const v=$("#gistToken").value.trim();if(!v){toast("Token 为空");return;}LS.setItem(GIST_TOKEN,v);renderSyncUI();toast("Token 已保存（仅本机）");});
+$("#initGist") && ($("#initGist").onclick=async function(){if(!LS.getItem(GIST_TOKEN)){toast("请先保存 Token");return;}syncStatus("初始化中…");await syncPush();renderSyncUI();toast("云端已初始化");});
+$("#pushBtn") && ($("#pushBtn").onclick=function(){if(!LS.getItem(GIST_TOKEN)){toast("请先保存 Token");return;}syncPush();});
+$("#pullBtn") && ($("#pullBtn").onclick=function(){if(!LS.getItem(GIST_TOKEN)){toast("请先保存 Token");return;}syncPull();});
+$("#autoSync") && ($("#autoSync").onchange=function(){LS.setItem("ky_autosync",$("#autoSync").checked?"1":"0");if($("#autoSync").checked&&!LS.getItem(GIST_ID))toast("请先初始化云端");});
+renderSyncUI();
+if(LS.getItem("ky_autosync")==="1"&&LS.getItem(GIST_TOKEN)&&LS.getItem(GIST_ID))syncPull();
+
+</script>
+</body>
+</html>
